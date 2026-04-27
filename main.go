@@ -11,16 +11,25 @@ import (
 )
 
 func main() {
+	logger := log.New(os.Stdout, "", log.Flags())
+	logger.Printf("We <3 Cement")
+
 	//load the env to get the token
 	err := godotenv.Load()
 	if err != nil {
-		log.Printf("No .env file found")
+		logger.Printf("No .env file found")
 	}
-	botToken := os.Getenv("DISCORD_BOT_TOKEN")
 
-	discord, err := discordgo.New("Bot " + (botToken))
+	token, found := os.LookupEnv("DISCORD_BOT_TOKEN")
+	if !found {
+		logger.Printf("Please provide the bot token")
+		os.Exit(1)
+	}
+
+	discord, err := discordgo.New("Bot " + token)
 	if err != nil {
-		log.Fatal(err)
+		logger.Printf("Failed to create discord bot: %s", err)
+		os.Exit(1)
 	}
 
 	discord.AddHandler(func(session *discordgo.Session, message *discordgo.MessageCreate) {
@@ -39,19 +48,17 @@ func main() {
 
 	err = discord.Open()
 	if err != nil {
-		log.Fatal(err)
+		logger.Printf("Failed to create start bot: %s", err)
+		os.Exit(1)
 	}
+	defer discord.Close()
 
-	logger := log.New(os.Stdout, "", log.Flags())
+	logger.Printf("Bot is on and working! Pres CTRL-C to exit.")
 
-	logger.Printf("We <3 Cement")
-	logger.Printf("Bot is on and working! CTRL-C to exit.")
-
-	//makes it so you can shutdown the bot (sad and mean and evil)
+	// Makes it so you can shutdown the bot (sad and mean and evil)
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sc
 
-	discord.Close()
 	logger.Printf("Shutting down... goodnight...")
 }
