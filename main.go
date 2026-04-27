@@ -32,6 +32,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	logger.Printf("Bot is waking up!")
+
 	discord.AddHandler(func(session *discordgo.Session, message *discordgo.MessageCreate) {
 
 		//checks if bot is the author so it doesnt get stuck in a loop
@@ -39,9 +41,7 @@ func main() {
 			return
 		}
 
-		if message.Content == "Eat cement" {
-			session.ChannelMessageSend(message.ChannelID, "You have eaten some cement!")
-		}
+		session.ChannelMessageSend(message.ChannelID, "You have eaten some cement!")
 	})
 
 	discord.Identify.Intents = discordgo.IntentsAllWithoutPrivileged
@@ -53,12 +53,13 @@ func main() {
 	}
 	defer discord.Close()
 
-	logger.Printf("Bot is on and working! Pres CTRL-C to exit.")
+	logger.Printf("The bot drank its coffe and is now awake :)")
+	logger.Printf("Press CTRL+C to put him to bed")
 
 	// Makes it so you can shutdown the bot (sad and mean and evil)
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sc
 
-	logger.Printf("Shutting down... goodnight...")
+	logger.Printf("The bot went to bed zZzZzZ")
 }
